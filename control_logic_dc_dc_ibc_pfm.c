@@ -1,31 +1,3 @@
-//###########################################################################
-//
-// FILE:   epwm_up_aq_cpu01.c
-//
-// TITLE:  Action Qualifier Module - Using up count.
-//
-//! \addtogroup cpu01_example_list
-//! <h1> EPWM Action Qualifier (epwm_up_aq)</h1>
-//!
-//! This example configures ePWM1, ePWM2, ePWM3 to produce an
-//! waveform with independent modulation on EPWMxA and
-//! EPWMxB.
-//!
-//! The compare values CMPA and CMPB are modified within the ePWM's ISR.
-//!
-//! The TB counter is in up count mode for this example.
-//!
-//! View the EPWM1A/B(PA0_GPIO0 & PA1_GPIO1), EPWM2A/B(PA2_GPIO2 & PA3_GPIO3)
-//! and EPWM3A/B(PA4_GPIO4 & PA5_GPIO5) waveforms via an oscilloscope.
-//!
-//
-//###########################################################################
-// $TI Release: F2837xD Support Library v210 $
-// $Release Date: Tue Nov  1 14:46:15 CDT 2016 $
-// $Copyright: Copyright (C) 2013-2016 Texas Instruments Incorporated -
-//             http://www.ti.com/ ALL RIGHTS RESERVED $
-//###########################################################################
-
 //
 // Included Files
 //
