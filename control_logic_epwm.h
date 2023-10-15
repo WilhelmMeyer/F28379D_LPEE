@@ -9,14 +9,21 @@
 #define CONTROL_LOGIC_EPWM_H_
 
 //
-// Enable EPWMs
+// EPWM Module
 //
-#define EPWM1_ENABLE 0x1
-#define EPWM2_ENABLE 0x2
-#define EPWM3_ENABLE 0x4
-#define EPWM4_ENABLE 0x8
-#define EPWM5_ENABLE 0x10
-#define EPWM6_ENABLE 0x20
+#define EPWM1_MODULE 1
+#define EPWM2_MODULE 2
+#define EPWM3_MODULE 3
+#define EPWM4_MODULE 4
+#define EPWM5_MODULE 5
+#define EPWM6_MODULE 6
+#define EPWM7_MODULE 7
+#define EPWM8_MODULE 8
+#define EPWM9_MODULE 9
+#define EPWM10_MODULE 10
+#define EPWM11_MODULE 11
+#define EPWM12_MODULE 12
+#define EPWM13_MODULE 13
 
 
 

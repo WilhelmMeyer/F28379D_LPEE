@@ -9,104 +9,78 @@
 #include "control_logic_adc.h"
 #include "control_logic_epwm.h"
 
-
 #ifndef CONTROL_LOGIC_H_
 #define CONTROL_LOGIC_H_
 
+//max total
+#define MAX_EPWM 14
+#define MAX_ADC 5
 
-struct AQUISITION_VARIABLES
+//max for the application
+#define MAX_ADCS 8
+#define MAX_EPWMS 6
+
+extern volatile struct EPWM_REGS *EPWM[MAX_EPWM];
+extern volatile struct ADC_REGS *ADC[MAX_ADC];
+
+struct ADC_VARIABLES
 {
     Uint16 adcChannel;
     Uint16 adcResults;
-    volatile struct ADC_REGS *adcRegs;
+    Uint16 socEnable;
+    Uint16 adcModule;
 };
 
 struct EPWM_VARIABLES
 {
     Uint16 epwmChannel;
     Uint16 period10ns;
-    Uint16 comparatorA;
-    Uint16 comparatorB;
+    Uint16 comparatorA10ns;
+    Uint16 comparatorB10ns;
     Uint16 deadbandEnable;
-    Uint16 risingEdgeDelay;
-    Uint16 fallingEdgeDelay;
-    volatile struct EPWM_REGS *ePwmRegs;
+    Uint16 risingEdgeDelay10ns;
+    Uint16 fallingEdgeDelay10ns;
+    Uint16 epwmModule;
 };
 
 struct IBC_PFM_VARIABLES
 {
-    PINT isrPointer;
-    struct AQUISITION_VARIABLES aquisition[5];
-    struct EPWM_VARIABLES epwm[6];
-    Uint16 epwmEnable;
+    void (*adcInterruptionFunction)(void);
+    struct ADC_VARIABLES adcs[MAX_ADCS];
+    struct EPWM_VARIABLES epwms[MAX_EPWMS];
+    Uint16 adcPeriod10ns;
+    Uint16 adcComparatorA10ns;
 };
 
-
-
-inline void initializeDsp(){
+inline void initializeDsp()
+{
 
     InitSysCtrl();
     InitGpio();
 
 }
 
-inline void initializeEpwms(struct IBC_PFM_VARIABLES *ibcPfmVariables){
+inline void initializeInterrupts()
+{
 
-    //
-    // Enable PWM1
-    //
-        CpuSysRegs.PCLKCR2.bit.EPWM1=1;
-        CpuSysRegs.PCLKCR2.bit.EPWM2=1;
-
-    //
-    // For this case just init GPIO pins for ePWM1
-    // These functions are in the F2837xD_EPwm.c file
-    //
-        InitEPwm1Gpio();
-        InitEPwm2Gpio();
-
-}
-
-
-inline void initializeInterrupts(){
-    //
-    // Step 3. Clear all interrupts and initialize PIE vector table:
     // Disable CPU interrupts
-    //
-        DINT;
+    DINT;
 
-    //
     // Initialize the PIE control registers to their default state.
-    // The default state is all PIE interrupts disabled and flags
-    // are cleared.
-    // This function is found in the F2837xD_PieCtrl.c file.
-    //
-        InitPieCtrl();
+    InitPieCtrl();
 
-    //
     // Disable CPU interrupts and clear all CPU interrupt flags:
-    //
-        IER = 0x0000;
-        IFR = 0x0000;
+    IER = 0x0000;
+    IFR = 0x0000;
 
-    //
     // Initialize the PIE vector table with pointers to the shell Interrupt
-    // Service Routines (ISR).
-    // This will populate the entire table, even if the interrupt
-    // is not used in this example.  This is useful for debug purposes.
-    // The shell ISR routines are found in F2837xD_DefaultIsr.c.
-    // This function is found in F2837xD_PieVect.c.
-    //
-        InitPieVectTable();
+    InitPieVectTable();
 
 }
 
-
-extern void configureDcDcIbcPfm(struct IBC_PFM_VARIABLES *dcdcIbcPfmVariables);
+extern void configureIbcPfm(struct IBC_PFM_VARIABLES *dcdcIbcPfmVariables);
 extern void configureADC(struct IBC_PFM_VARIABLES *dcdcIbcPfmPointer);
-extern void setupAdcEpwm(struct IBC_PFM_VARIABLES *dcdcIbcPfmPointer);
-
-
-
+extern void initializeEpwms(struct IBC_PFM_VARIABLES *ibcPfmVariables);
+extern void configureEpwms(struct IBC_PFM_VARIABLES *ibcPfmVariables);
 
 #endif /* CONTROL_LOGIC_H_ */

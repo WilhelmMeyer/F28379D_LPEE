@@ -39,11 +39,10 @@
 //
 // ADC Module
 //
-#define ADCA_MODULE 0
-#define ADCB_MODULE 1
-#define ADCC_MODULE 2
-#define ADCD_MODULE 3
-
+#define ADCA_MODULE 1
+#define ADCB_MODULE 2
+#define ADCC_MODULE 3
+#define ADCD_MODULE 4
 
 //
 // ADC Channel
@@ -112,6 +111,24 @@
 #define ADCD13_CHANNEL 0x3D
 #define ADCD14_CHANNEL 0x3E
 #define ADCD15_CHANNEL 0x3F
+
+#define SOC0_ENABLE 0x1
+#define SOC1_ENABLE 0x2
+#define SOC2_ENABLE 0x4
+#define SOC3_ENABLE 0x8
+#define SOC4_ENABLE 0x10
+#define SOC5_ENABLE 0x20
+#define SOC6_ENABLE 0x40
+#define SOC7_ENABLE 0x80
+#define SOC8_ENABLE 0x100
+#define SOC9_ENABLE 0x200
+#define SOC10_ENABLE 0x400
+#define SOC11_ENABLE 0x800
+#define SOC12_ENABLE 0x1000
+#define SOC13_ENABLE 0x2000
+#define SOC14_ENABLE 0x4000
+#define SOC15_ENABLE 0x8000
+#define SOC_ALL_ENABLE 0xFFFF
 
 
 
