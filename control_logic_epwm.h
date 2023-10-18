@@ -9,21 +9,46 @@
 #define CONTROL_LOGIC_EPWM_H_
 
 //
+// EPWM OPERATION
+//
+#define EPWM_DISABLE 0
+#define EPWM_ENABLE 1
+
+//
+// EPWM CONFIGURATION
+//
+#define EPWM_ALWAYS_OFF 1
+#define EPWM_ALWAYS_ON 2
+#define EPWM_SC_PFM 3
+#define EPWM_SC_PFM_SUPERPOSITION 4
+#define EPWM_SC_PFM_DEADBAND 5
+
+
+//
+// EPWM DEADBAND OUT_SWAP
+//
+#define DB_OUTSWAP_AB 0x0   // out swap off
+#define DB_OUTSWAP_BB 0x1   // both outputs as EPWMxB
+#define DB_OUTSWAP_AA 0x2   // both outputs as EPWMxA
+#define DB_OUTSWAP_BA 0x3   // inverse outputs
+
+
+//
 // EPWM Module
 //
-#define EPWM1_MODULE 1
-#define EPWM2_MODULE 2
-#define EPWM3_MODULE 3
-#define EPWM4_MODULE 4
-#define EPWM5_MODULE 5
-#define EPWM6_MODULE 6
-#define EPWM7_MODULE 7
-#define EPWM8_MODULE 8
-#define EPWM9_MODULE 9
-#define EPWM10_MODULE 10
-#define EPWM11_MODULE 11
-#define EPWM12_MODULE 12
-#define EPWM13_MODULE 13
+#define EPWM1_MODULE 0
+#define EPWM2_MODULE 1
+#define EPWM3_MODULE 2
+#define EPWM4_MODULE 3
+#define EPWM5_MODULE 4
+#define EPWM6_MODULE 5
+#define EPWM7_MODULE 6
+#define EPWM8_MODULE 7
+#define EPWM9_MODULE 8
+#define EPWM10_MODULE 9
+#define EPWM11_MODULE 10
+#define EPWM12_MODULE 11
+#define EPWM13_MODULE 12
 
 
 

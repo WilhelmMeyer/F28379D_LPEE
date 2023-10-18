@@ -11,27 +11,48 @@
 //  Function Prototypes
 //
 
-volatile struct EPWM_REGS *EPWM[MAX_EPWM] = { 0, &EPwm1Regs, &EPwm2Regs,
-                                              &EPwm3Regs, &EPwm4Regs,
-                                              &EPwm5Regs, &EPwm6Regs,
-                                              &EPwm7Regs, &EPwm8Regs,
-                                              &EPwm9Regs, &EPwm10Regs,
-                                              &EPwm11Regs, &EPwm12Regs };
+volatile struct EPWM_REGS *EPWM[TOTAL_EPWM] = { &EPwm1Regs, &EPwm2Regs,
+                                                &EPwm3Regs, &EPwm4Regs,
+                                                &EPwm5Regs, &EPwm6Regs,
+                                                &EPwm7Regs, &EPwm8Regs,
+                                                &EPwm9Regs, &EPwm10Regs,
+                                                &EPwm11Regs, &EPwm12Regs };
 
-volatile struct ADC_REGS *ADC[MAX_ADC] = { 0, &AdcaRegs, &AdcbRegs, &AdccRegs,
-                                           &AdcdRegs };
+volatile struct ADC_REGS *ADC[TOTAL_ADC] = { &AdcaRegs, &AdcbRegs, &AdccRegs,
+                                             &AdcdRegs };
 
 void configureIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables)
 {
+
+    initializeEpwms(ibcPfmVariables);
+
+    initializeAdcInterrupts(ibcPfmVariables);
 
     EALLOW;
     CpuSysRegs.PCLKCR0.bit.TBCLKSYNC = 0;
     EDIS;
 
-//    configureADC(ibcPfmVariables);
-    configureEpwms(ibcPfmVariables);
+    for (int i = 0; i < MAX_ADC; i++)
+    {
+        if (ibcPfmVariables->adcs[i].enable)
+        {
+            configureADC(&ibcPfmVariables->adcs[i]);
+        }
+    }
 
-    //Enable group 1 interrupts
+
+
+    configureAdcEPWM(ibcPfmVariables);
+
+    for (int i = 0; i < MAX_EPWM; i++)
+    {
+        if (ibcPfmVariables->epwms[i].enable)
+        {
+            configureEpwm(ibcPfmVariables->epwms[i]);
+        }
+    }
+
+    //Enable group 1 interrupts (ADCx1)
     // Enable Global interrupt INTM
     // Enable Global realtime interrupt DBGM
     IER |= M_INT1;
@@ -44,8 +65,8 @@ void configureIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables)
     CpuSysRegs.PCLKCR0.bit.TBCLKSYNC = 1;
     EDIS;
 
-//    EPwm7Regs.ETSEL.bit.SOCAEN = TB_ENABLE;  //enable SOCA
-//    EPwm7Regs.TBCTL.bit.CTRMODE = TB_COUNT_UP; //unfreeze, and enter up count mode
+    EPwm7Regs.ETSEL.bit.SOCAEN = TB_ENABLE;  //enable SOCA
+    EPwm7Regs.TBCTL.bit.CTRMODE = TB_COUNT_UP; //unfreeze, and enter up count mode
 
 }
 
