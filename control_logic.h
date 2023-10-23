@@ -8,6 +8,7 @@
 #include "F2837xD_adc.h"
 #include "control_logic_adc.h"
 #include "control_logic_epwm.h"
+#include "control_logic_util.h"
 
 #ifndef CONTROL_LOGIC_H_
 #define CONTROL_LOGIC_H_
@@ -125,5 +126,14 @@ extern void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm,
                                 Uint16 epwmConfiguration, Uint16 epwmModule,
                                 Uint16 followUp, Uint32 period10ns,
                                 Uint32 delay10ns);
+
+//
+// control_logic_util.c util functions
+//
+extern double rmsCalculation(struct RMS_CALCULATION *rms,
+                             double newAcquisition);
+
+extern void configureRmsCalculation(struct RMS_CALCULATION *rms,
+        float cutOffFrequencyHz, Uint16 samplingPeriod10ns);
 
 #endif /* CONTROL_LOGIC_H_ */

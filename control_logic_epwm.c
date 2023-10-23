@@ -92,13 +92,12 @@ void configureEpwm(struct EPWM_VARIABLES epwm)
     //
     // Set actions
     //
-    (*EPWM[epwm.module]).AQCTLA.bit.ZRO = AQ_SET;       // Set PWM1A on Zero
-    (*EPWM[epwm.module]).AQCTLA.bit.CAU = AQ_CLEAR; // Clear PWM1A on event A,
-    // up count
 
-    (*EPWM[epwm.module]).AQCTLB.bit.CAU = AQ_SET;       // Set PWM1B on Zero
-    (*EPWM[epwm.module]).AQCTLB.bit.ZRO = AQ_CLEAR; // Clear PWM1B on event B,
-    // up count
+    (*EPWM[epwm.module]).AQCTLA.bit.ZRO = AQ_SET;
+    (*EPWM[epwm.module]).AQCTLA.bit.CAU = AQ_CLEAR;
+
+    (*EPWM[epwm.module]).AQCTLB.bit.CAU = AQ_SET;
+    (*EPWM[epwm.module]).AQCTLB.bit.ZRO = AQ_CLEAR;
 
     if (epwm.epwmConfiguration == EPWM_SC_PFM_SUPERPOSITION)
     {
@@ -141,7 +140,7 @@ void updateComparatorB(struct EPWM_VARIABLES *epwm, Uint16 comparatorB10ns)
 }
 
 void updateEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
-                        Uint16 period10ns)
+                            Uint16 period10ns)
 {
     Uint16 comparatorA10ns = period10ns >> 1;
     for (int i = 0; i < MAX_EPWM; i++)
@@ -164,5 +163,12 @@ void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm, Uint16 epwmConfiguration,
     epwm->fallingEdgeDelay10ns = delay10ns;
     epwm->module = epwmModule;
     epwm->followUp = followUp;
+    epwm->enable = EPWM_ENABLE;
+}
+
+void updateEpwmConfiguration(struct EPWM_VARIABLES *epwm,
+                             Uint16 epwmConfiguration)
+{
+    epwm->epwmConfiguration = epwmConfiguration;
     epwm->enable = EPWM_ENABLE;
 }

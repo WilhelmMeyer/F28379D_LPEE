@@ -280,8 +280,7 @@ void configureAdcAquisition(struct ADC_VARIABLES *adc, float coefA, float coefB,
     adc->coefB = coefB;
     adc->cutOffFrequencyHz = cutOffFrequencyHz;
     adc->coefFilter = exp(
-            -(__div2pif32(adc->cutOffFrequencyHz)) * samplingPeriod10ns
-                    / 100000000);
+            -__div2pif32(adc->cutOffFrequencyHz) * samplingPeriod10ns * 1e-8);
 }
 
 void setAdcSingle(struct ADC_VARIABLES *adc, Uint16 channel, Uint16 soc)

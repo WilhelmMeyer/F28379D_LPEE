@@ -16,6 +16,7 @@
 // Globals
 //
 struct IBC_PFM_VARIABLES ibcPfmVariables;
+struct RMS_CALCULATION rmsVoltageA;
 
 Uint32 pulseFrequency = 50000;
 Uint32 superpositionDelay10ns = 20;
@@ -54,8 +55,9 @@ void initializeVariables(void)
     //
     ibcPfmVariables.adcInterruptionFunction = &interruptionFunction;
 
-    updateSamplingPeriodIbcPfm(&ibcPfmVariables,
-                               frequencyToPeriod10ns(pulseFrequency));
+    Uint32 period10ns = frequencyToPeriod10ns(pulseFrequency);
+
+    updateSamplingPeriodIbcPfm(&ibcPfmVariables, period10ns);
 
     //
     // Set adc channels and enable SoC for oversample;
@@ -67,16 +69,21 @@ void initializeVariables(void)
                      &ibcPfmVariables.adc[4], ADCD15_CHANNEL);
 
     configureAdcAquisition(&ibcPfmVariables.adc[0], VOLTAGE_OUTPUT_COEF, 0,
-                           100000, 2000);
+                           100000, period10ns);
     configureAdcAquisition(&ibcPfmVariables.adc[1], VOLTAGE_OUTPUT_COEF, 0,
-                           100000, 2000);
+                           100000, period10ns);
 
     configureAdcAquisition(&ibcPfmVariables.adc[2], VOLTAGE_PHASE_A_COEF,
-                           VOLTAGE_PHASE_A_OFFSET, 100000, 2000);
+    VOLTAGE_PHASE_A_OFFSET,
+                           100000, period10ns);
     configureAdcAquisition(&ibcPfmVariables.adc[3], VOLTAGE_PHASE_A_COEF,
-                           VOLTAGE_PHASE_A_OFFSET, 100000, 2000);
+    VOLTAGE_PHASE_A_OFFSET,
+                           100000, period10ns);
     configureAdcAquisition(&ibcPfmVariables.adc[4], VOLTAGE_PHASE_A_COEF,
-                           VOLTAGE_PHASE_A_OFFSET, 100000, 2000);
+    VOLTAGE_PHASE_A_OFFSET,
+                           100000, period10ns);
+
+    configureRmsCalculation(&rmsVoltageA, 60, period10ns);
 
     for (int i = 0; i < MAX_EPWM; i++)
     {
@@ -102,6 +109,18 @@ void interruptionFunction(void)
     for (int i = 0; i < 5; i++)
     {
         updateAnalogValueFiltered(&ibcPfmVariables.adc[i]);
+    }
+
+    rmsCalculation(&rmsVoltageA, ibcPfmVariables.adc[2].filteredValue);
+
+    if (ibcPfmVariables.adc[2].filteredValue > 0)
+    {
+        updateEpwmConfiguration(&ibcPfmVariables.epwm[0],
+        EPWM_SC_PFM_SUPERPOSITION);
+    }
+    else
+    {
+
     }
 
 }
