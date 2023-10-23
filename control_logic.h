@@ -15,6 +15,7 @@
 //max total
 #define TOTAL_EPWM 13
 #define TOTAL_ADC 4
+#define TOTAL_ADC_RESULTS 16
 
 //max for the application
 #define MAX_ADC 8
@@ -22,6 +23,7 @@
 
 extern volatile struct EPWM_REGS *EPWM[TOTAL_EPWM];
 extern volatile struct ADC_REGS *ADC[TOTAL_ADC];
+extern volatile Uint16 *ADC_RESULTS[TOTAL_ADC][TOTAL_ADC_RESULTS];
 
 struct ADC_VARIABLES
 {
@@ -30,11 +32,16 @@ struct ADC_VARIABLES
     Uint16 overSample;
     Uint16 module;
     Uint16 enable;
+    double coefA;
+    double coefB;
+    double value;
+    Uint32 cutOffFrequencyHz;
+    double coefFilter;
+    double filteredValue;
 };
 
 struct EPWM_VARIABLES
 {
-    Uint16 channel;
     Uint16 period10ns;
     Uint16 comparatorA10ns;
     Uint16 comparatorB10ns;
@@ -42,14 +49,15 @@ struct EPWM_VARIABLES
     Uint16 risingEdgeDelay10ns;
     Uint16 fallingEdgeDelay10ns;
     Uint16 module;
+    Uint16 followUp;
     Uint16 enable;
 };
 
 struct IBC_PFM_VARIABLES
 {
     void (*adcInterruptionFunction)(void);
-    struct ADC_VARIABLES adcs[MAX_ADC];
-    struct EPWM_VARIABLES epwms[MAX_EPWM];
+    struct ADC_VARIABLES adc[MAX_ADC];
+    struct EPWM_VARIABLES epwm[MAX_EPWM];
     Uint16 adcPeriod10ns;
     Uint16 adcComparatorA10ns;
 };
@@ -89,6 +97,25 @@ extern void setAdc4PerModule(struct ADC_VARIABLES *adc1, Uint16 channel1,
                              struct ADC_VARIABLES *adc3, Uint16 channel3,
                              struct ADC_VARIABLES *adc4, Uint16 channel4);
 
-extern void updatePeriodIbcPfm(struct EPWM_VARIABLES *epwm, Uint16 period10ns);
+extern void configureAdcAquisition(struct ADC_VARIABLES *adc, float coefA,
+                                   float coefB, float cutOffFrequencyHz,
+                                   Uint16 samplingPeriod10ns);
+
+extern void updateEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
+                                   Uint16 period10ns);
+
+extern void updateSamplingPeriodIbcPfm(
+        struct IBC_PFM_VARIABLES *ibcPfmVariables, Uint16 period10ns);
+
+extern void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm,
+                                Uint16 epwmConfiguration, Uint16 epwmModule,
+                                Uint16 followUp, Uint32 period10ns,
+                                Uint32 delay10ns);
+
+extern Uint16 updateAnalogResultRead(struct ADC_VARIABLES *adc);
+
+extern double updateAnalogValue(struct ADC_VARIABLES *adc);
+
+extern double updateAnalogValueFiltered(struct ADC_VARIABLES *adc);
 
 #endif /* CONTROL_LOGIC_H_ */

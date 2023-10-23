@@ -6,6 +6,7 @@
  */
 #include "F28x_Project.h"
 #include "control_logic.h"
+#include <math.h>
 
 //
 // Defines
@@ -23,21 +24,20 @@ interrupt void adcbInterruption(void);
 interrupt void adccInterruption(void);
 interrupt void adcdInterruption(void);
 
-void setupAdcEpwm(struct ADC_VARIABLES adc);
-
 void (*adcInterruptionFunction)(void);
+
+void setupAdcEpwm(struct ADC_VARIABLES adc);
 
 void initializeAdcInterrupts(struct IBC_PFM_VARIABLES *ibcPfmVariables)
 {
 
-
-    if (!ibcPfmVariables->adcs[0].enable)
+    if (!ibcPfmVariables->adc[0].enable)
         return;
 
     EALLOW;
 
     adcInterruptionFunction = ibcPfmVariables->adcInterruptionFunction;
-    switch (ibcPfmVariables->adcs[0].module)
+    switch (ibcPfmVariables->adc[0].module)
     {
     case ADCA_MODULE:
         PieVectTable.ADCA1_INT = &adcaInterruption; //function for ADCA interrupt 1
@@ -273,6 +273,17 @@ void setAdcModule(struct ADC_VARIABLES *adc)
     }
 }
 
+void configureAdcAquisition(struct ADC_VARIABLES *adc, float coefA, float coefB,
+                            float cutOffFrequencyHz, Uint16 samplingPeriod10ns)
+{
+    adc->coefA = coefA;
+    adc->coefB = coefB;
+    adc->cutOffFrequencyHz = cutOffFrequencyHz;
+    adc->coefFilter = exp(
+            -(__div2pif32(adc->cutOffFrequencyHz)) * samplingPeriod10ns
+                    / 100000000);
+}
+
 void setAdcSingle(struct ADC_VARIABLES *adc, Uint16 channel, Uint16 soc)
 {
     adc->channel = channel;
@@ -329,6 +340,43 @@ void setAdc4PerModule(struct ADC_VARIABLES *adc1, Uint16 channel1,
     setAdcModule(adc4);
 }
 
+Uint16 updateAnalogResultRead(struct ADC_VARIABLES *adc)
+{
+    Uint32 result = 0;
+
+    for (int i = 0; i < TOTAL_ADC_RESULTS; i++)
+    {
+        if (adc->overSample & 0x0001 << i)
+            result += *ADC_RESULTS[adc->module][i];
+    }
+
+    adc->results = (Uint16) __divf32(result, 16);
+
+    return adc->results;
+}
+
+double updateAnalogValue(struct ADC_VARIABLES *adc)
+{
+    updateAnalogResultRead(adc);
+    adc->value = adc->coefA * adc->results + adc->coefB;
+    return adc->value;
+}
+
+double updateAnalogValueFiltered(struct ADC_VARIABLES *adc)
+{
+    updateAnalogValue(adc);
+    adc->filteredValue = adc->value
+            + adc->coefFilter * (adc->filteredValue - adc->value);
+    return adc->filteredValue;
+}
+
+void updateSamplingPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
+                                Uint16 period10ns)
+{
+    ibcPfmVariables->adcPeriod10ns = period10ns;
+    ibcPfmVariables->adcComparatorA10ns = period10ns >> 1;
+}
+
 interrupt void adcaInterruption(void)
 {
 
@@ -364,4 +412,3 @@ interrupt void adcdInterruption(void)
     AdcdRegs.ADCINTFLGCLR.bit.ADCINT1 = 1; //clear INT1 flag
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
 }
-

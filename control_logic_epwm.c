@@ -11,38 +11,38 @@ void initializeEpwms(struct IBC_PFM_VARIABLES *ibcPfmVariables)
 {
     for (int i = 0; i < MAX_EPWM; i++)
     {
-        if (ibcPfmVariables->epwms[i].enable
-                && ibcPfmVariables->epwms[i].module == EPWM1_MODULE)
+        if (ibcPfmVariables->epwm[i].enable
+                && ibcPfmVariables->epwm[i].module == EPWM1_MODULE)
         {
             CpuSysRegs.PCLKCR2.bit.EPWM1 = 1;
             InitEPwm1Gpio();
         }
-        else if (ibcPfmVariables->epwms[i].enable
-                && ibcPfmVariables->epwms[i].module == EPWM2_MODULE)
+        else if (ibcPfmVariables->epwm[i].enable
+                && ibcPfmVariables->epwm[i].module == EPWM2_MODULE)
         {
             CpuSysRegs.PCLKCR2.bit.EPWM2 = 1;
             InitEPwm2Gpio();
         }
-        else if (ibcPfmVariables->epwms[i].enable
-                && ibcPfmVariables->epwms[i].module == EPWM3_MODULE)
+        else if (ibcPfmVariables->epwm[i].enable
+                && ibcPfmVariables->epwm[i].module == EPWM3_MODULE)
         {
             CpuSysRegs.PCLKCR2.bit.EPWM3 = 1;
             InitEPwm3Gpio();
         }
-        else if (ibcPfmVariables->epwms[i].enable
-                && ibcPfmVariables->epwms[i].module == EPWM4_MODULE)
+        else if (ibcPfmVariables->epwm[i].enable
+                && ibcPfmVariables->epwm[i].module == EPWM4_MODULE)
         {
             CpuSysRegs.PCLKCR2.bit.EPWM4 = 1;
             InitEPwm4Gpio();
         }
-        else if (ibcPfmVariables->epwms[i].enable
-                && ibcPfmVariables->epwms[i].module == EPWM5_MODULE)
+        else if (ibcPfmVariables->epwm[i].enable
+                && ibcPfmVariables->epwm[i].module == EPWM5_MODULE)
         {
             CpuSysRegs.PCLKCR2.bit.EPWM5 = 1;
             InitEPwm5Gpio();
         }
-        else if (ibcPfmVariables->epwms[i].enable
-                && ibcPfmVariables->epwms[i].module == EPWM6_MODULE)
+        else if (ibcPfmVariables->epwm[i].enable
+                && ibcPfmVariables->epwm[i].module == EPWM6_MODULE)
         {
             CpuSysRegs.PCLKCR2.bit.EPWM6 = 1;
             InitEPwm6Gpio();
@@ -66,6 +66,9 @@ void configureEpwm(struct EPWM_VARIABLES epwm)
     {
         (*EPWM[epwm.module]).TBCTL.bit.PHSEN = TB_ENABLE;
         (*EPWM[epwm.module]).TBCTL.bit.SYNCOSEL = TB_SYNC_IN;
+        (*EPWM[epwm.module]).TBCTL2.bit.SYNCOSELX = 00;
+        (*EPWM[epwm.module]).EPWMXLINK.bit.CMPALINK = 0000;
+        (*EPWM[epwm.module]).EPWMXLINK.bit.TBPRDLINK = 0000;
     }
     (*EPWM[epwm.module]).TBPHS.bit.TBPHS = 0x0000;        // Phase is 0
     (*EPWM[epwm.module]).TBCTR = 0x0000;                  // Clear counter
@@ -120,13 +123,15 @@ void configureEpwm(struct EPWM_VARIABLES epwm)
 void updatePeriod(struct EPWM_VARIABLES *epwm, Uint16 period10ns)
 {
     epwm->period10ns = period10ns;
-    (*EPWM[epwm->module]).TBPRD = epwm->period10ns;
+    if (epwm->followUp == epwm->module)
+        (*EPWM[epwm->module]).TBPRD = epwm->period10ns;
 }
 
 void updateComparatorA(struct EPWM_VARIABLES *epwm, Uint16 comparatorA10ns)
 {
     epwm->comparatorA10ns = comparatorA10ns;
-    (*EPWM[epwm->module]).CMPA.bit.CMPA = epwm->comparatorA10ns;
+    if (epwm->followUp == epwm->module)
+        (*EPWM[epwm->module]).CMPA.bit.CMPA = epwm->comparatorA10ns;
 }
 
 void updateComparatorB(struct EPWM_VARIABLES *epwm, Uint16 comparatorB10ns)
@@ -135,9 +140,29 @@ void updateComparatorB(struct EPWM_VARIABLES *epwm, Uint16 comparatorB10ns)
     (*EPWM[epwm->module]).CMPB.bit.CMPB = epwm->comparatorB10ns;
 }
 
-void updatePeriodIbcPfm(struct EPWM_VARIABLES *epwm, Uint16 period10ns)
+void updateEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
+                        Uint16 period10ns)
 {
     Uint16 comparatorA10ns = period10ns >> 1;
-    updatePeriod(epwm, period10ns);
-    updateComparatorA(epwm, comparatorA10ns);
+    for (int i = 0; i < MAX_EPWM; i++)
+    {
+        updatePeriod(&ibcPfmVariables->epwm[i], period10ns);
+        updateComparatorA(&ibcPfmVariables->epwm[i], comparatorA10ns);
+    }
+}
+
+void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm, Uint16 epwmConfiguration,
+                         Uint16 epwmModule, Uint16 followUp, Uint32 period10ns,
+                         Uint32 delay10ns)
+{
+    period10ns--; // fix epwm TBPRD count
+
+    epwm->period10ns = period10ns;
+    epwm->comparatorA10ns = period10ns >> 1;
+    epwm->epwmConfiguration = epwmConfiguration;
+    epwm->risingEdgeDelay10ns = delay10ns;
+    epwm->fallingEdgeDelay10ns = delay10ns;
+    epwm->module = epwmModule;
+    epwm->followUp = followUp;
+    epwm->enable = EPWM_ENABLE;
 }

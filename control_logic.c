@@ -21,6 +21,40 @@ volatile struct EPWM_REGS *EPWM[TOTAL_EPWM] = { &EPwm1Regs, &EPwm2Regs,
 volatile struct ADC_REGS *ADC[TOTAL_ADC] = { &AdcaRegs, &AdcbRegs, &AdccRegs,
                                              &AdcdRegs };
 
+volatile Uint16 *ADC_RESULTS[TOTAL_ADC][TOTAL_ADC_RESULTS] = {
+        { &AdcaResultRegs.ADCRESULT0, &AdcaResultRegs.ADCRESULT1,
+          &AdcaResultRegs.ADCRESULT2, &AdcaResultRegs.ADCRESULT3,
+          &AdcaResultRegs.ADCRESULT4, &AdcaResultRegs.ADCRESULT5,
+          &AdcaResultRegs.ADCRESULT6, &AdcaResultRegs.ADCRESULT7,
+          &AdcaResultRegs.ADCRESULT8, &AdcaResultRegs.ADCRESULT9,
+          &AdcaResultRegs.ADCRESULT10, &AdcaResultRegs.ADCRESULT11,
+          &AdcaResultRegs.ADCRESULT12, &AdcaResultRegs.ADCRESULT13,
+          &AdcaResultRegs.ADCRESULT14, &AdcaResultRegs.ADCRESULT15 },
+        { &AdcbResultRegs.ADCRESULT0, &AdcbResultRegs.ADCRESULT1,
+          &AdcbResultRegs.ADCRESULT2, &AdcbResultRegs.ADCRESULT3,
+          &AdcbResultRegs.ADCRESULT4, &AdcbResultRegs.ADCRESULT5,
+          &AdcbResultRegs.ADCRESULT6, &AdcbResultRegs.ADCRESULT7,
+          &AdcbResultRegs.ADCRESULT8, &AdcbResultRegs.ADCRESULT9,
+          &AdcbResultRegs.ADCRESULT10, &AdcbResultRegs.ADCRESULT11,
+          &AdcbResultRegs.ADCRESULT12, &AdcbResultRegs.ADCRESULT13,
+          &AdcbResultRegs.ADCRESULT14, &AdcbResultRegs.ADCRESULT15 },
+        { &AdccResultRegs.ADCRESULT0, &AdccResultRegs.ADCRESULT1,
+          &AdccResultRegs.ADCRESULT2, &AdccResultRegs.ADCRESULT3,
+          &AdccResultRegs.ADCRESULT4, &AdccResultRegs.ADCRESULT5,
+          &AdccResultRegs.ADCRESULT6, &AdccResultRegs.ADCRESULT7,
+          &AdccResultRegs.ADCRESULT8, &AdccResultRegs.ADCRESULT9,
+          &AdccResultRegs.ADCRESULT10, &AdccResultRegs.ADCRESULT11,
+          &AdccResultRegs.ADCRESULT12, &AdccResultRegs.ADCRESULT13,
+          &AdccResultRegs.ADCRESULT14, &AdccResultRegs.ADCRESULT15 },
+        { &AdcdResultRegs.ADCRESULT0, &AdcdResultRegs.ADCRESULT1,
+          &AdcdResultRegs.ADCRESULT2, &AdcdResultRegs.ADCRESULT3,
+          &AdcdResultRegs.ADCRESULT4, &AdcdResultRegs.ADCRESULT5,
+          &AdcdResultRegs.ADCRESULT6, &AdcdResultRegs.ADCRESULT7,
+          &AdcdResultRegs.ADCRESULT8, &AdcdResultRegs.ADCRESULT9,
+          &AdcdResultRegs.ADCRESULT10, &AdcdResultRegs.ADCRESULT11,
+          &AdcdResultRegs.ADCRESULT12, &AdcdResultRegs.ADCRESULT13,
+          &AdcdResultRegs.ADCRESULT14, &AdcdResultRegs.ADCRESULT15 } };
+
 void configureIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables)
 {
 
@@ -34,21 +68,19 @@ void configureIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables)
 
     for (int i = 0; i < MAX_ADC; i++)
     {
-        if (ibcPfmVariables->adcs[i].enable)
+        if (ibcPfmVariables->adc[i].enable)
         {
-            configureADC(&ibcPfmVariables->adcs[i]);
+            configureADC(&ibcPfmVariables->adc[i]);
         }
     }
-
-
 
     configureAdcEPWM(ibcPfmVariables);
 
     for (int i = 0; i < MAX_EPWM; i++)
     {
-        if (ibcPfmVariables->epwms[i].enable)
+        if (ibcPfmVariables->epwm[i].enable)
         {
-            configureEpwm(ibcPfmVariables->epwms[i]);
+            configureEpwm(ibcPfmVariables->epwm[i]);
         }
     }
 

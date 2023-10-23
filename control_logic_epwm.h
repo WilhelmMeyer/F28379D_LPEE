@@ -51,5 +51,20 @@
 #define EPWM13_MODULE 12
 
 
+//
+// EPWMXLINK makes a particular EPWM to follow other EPWM (such as TBPRD, CMPA, CMPB, etc)
+//
+#define EPWM1_LINK 0x0
+#define EPWM2_LINK 0x1
+#define EPWM3_LINK 0x2
+#define EPWM4_LINK 0x3
+#define EPWM5_LINK 0x4
+#define EPWM6_LINK 0x5
+#define EPWM7_LINK 0x6
+#define EPWM8_LINK 0x7
+#define EPWM9_LINK 0x8
+#define EPWM10_LINK 0x9
+#define EPWM11_LINK 0xA
+#define EPWM12_LINK 0xB
 
 #endif /* CONTROL_LOGIC_EPWM_H_ */
