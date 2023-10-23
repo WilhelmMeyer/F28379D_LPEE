@@ -8,7 +8,7 @@
 #include "control_logic.h"
 
 //
-//  Function Prototypes
+// struct variables initialization
 //
 
 volatile struct EPWM_REGS *EPWM[TOTAL_EPWM] = { &EPwm1Regs, &EPwm2Regs,
@@ -54,6 +54,23 @@ volatile Uint16 *ADC_RESULTS[TOTAL_ADC][TOTAL_ADC_RESULTS] = {
           &AdcdResultRegs.ADCRESULT10, &AdcdResultRegs.ADCRESULT11,
           &AdcdResultRegs.ADCRESULT12, &AdcdResultRegs.ADCRESULT13,
           &AdcdResultRegs.ADCRESULT14, &AdcdResultRegs.ADCRESULT15 } };
+
+//
+//  Function Prototypes
+//
+
+void initializeDsp()
+{
+
+    InitSysCtrl();
+    InitGpio();
+    DINT;
+    InitPieCtrl();
+    IER = 0x0000;
+    IFR = 0x0000;
+    InitPieVectTable();
+
+}
 
 void configureIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables)
 {
@@ -102,3 +119,7 @@ void configureIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables)
 
 }
 
+Uint32 frequencyToPeriod10ns(float frequency)
+{
+    return (Uint32) __divf32(100000000, frequency);
+}

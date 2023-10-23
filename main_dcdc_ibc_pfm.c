@@ -7,17 +7,22 @@
 //
 // Defines
 //
+#define VOLTAGE_OUTPUT_COEF 0.126037735849
 
 //
 // Globals
 //
 struct IBC_PFM_VARIABLES ibcPfmVariables;
 
+Uint32 pulseFrequency = 50000;
+Uint32 superpositionDelay10ns = 20;
+
 //
 //  Function Prototypes
 //
 void interruptionFunction(void);
 void initializeVariables(void);
+Uint32 frequencyToPeriod10ns(float frequency);
 
 //
 // Main
@@ -46,28 +51,39 @@ void initializeVariables(void)
     //
     ibcPfmVariables.adcInterruptionFunction = &interruptionFunction;
 
+    updateSamplingPeriodIbcPfm(&ibcPfmVariables,
+                               frequencyToPeriod10ns(pulseFrequency));
+
     //
     // Set adc channels and enable SoC for oversample;
     //
-    setAdc1PerModule(&ibcPfmVariables.adcs[0], ADCA4_CHANNEL);
+    setAdc1PerModule(&ibcPfmVariables.adc[0], ADCA4_CHANNEL);
 
-    ibcPfmVariables.epwms[0].period10ns = 1999;
-    ibcPfmVariables.epwms[0].comparatorA10ns = 999;
-    ibcPfmVariables.epwms[0].comparatorB10ns = 999;
-    ibcPfmVariables.epwms[0].deadbandEnable = 1;
-    ibcPfmVariables.epwms[0].risingEdgeDelay10ns = 49;
-    ibcPfmVariables.epwms[0].fallingEdgeDelay10ns = 49;
-    ibcPfmVariables.epwms[0].module = EPWM1_MODULE;
-    ibcPfmVariables.epwms[0].enable = EPWM_ENABLE;
+    configureAdcAquisition(&ibcPfmVariables.adc[0], VOLTAGE_OUTPUT_COEF, 0,
+                           100000, 2000);
 
-    ibcPfmVariables.adcPeriod10ns = 2000;
-    ibcPfmVariables.adcComparatorA10ns = 1000;
+    configureIbcPfmEpwm(&ibcPfmVariables.epwm[0],
+    EPWM_SC_PFM_SUPERPOSITION,
+                        EPWM1_MODULE, EPWM1_LINK,
+                        frequencyToPeriod10ns(pulseFrequency),
+                        superpositionDelay10ns);
+
 }
 
 //
-// interruption function
+// interruption function acquisition
 //
 void interruptionFunction(void)
 {
+    Uint32 period = frequencyToPeriod10ns(pulseFrequency);
+
+    updateEpwmPeriodIbcPfm(&ibcPfmVariables, period);
+
+    updateAnalogValueFiltered(&ibcPfmVariables.adc[0]);
 
 }
+
+//
+// user defined functions
+//
+

@@ -106,7 +106,7 @@ void interruptionFunction(void)
 
 }
 
-Uint32 frequencyToPeriod10ns(float frequency)
-{
-    return (Uint32) __divf32(100000000, frequency);
-}
+//
+// user defined functions
+//
+

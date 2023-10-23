@@ -12,6 +12,10 @@
 #ifndef CONTROL_LOGIC_H_
 #define CONTROL_LOGIC_H_
 
+//
+// defines
+//
+
 //max total
 #define TOTAL_EPWM 13
 #define TOTAL_ADC 4
@@ -20,6 +24,10 @@
 //max for the application
 #define MAX_ADC 8
 #define MAX_EPWM 6
+
+//
+// Struct variables definitions
+//
 
 extern volatile struct EPWM_REGS *EPWM[TOTAL_EPWM];
 extern volatile struct ADC_REGS *ADC[TOTAL_ADC];
@@ -62,30 +70,23 @@ struct IBC_PFM_VARIABLES
     Uint16 adcComparatorA10ns;
 };
 
-inline void initializeDsp()
-{
-
-    InitSysCtrl();
-    InitGpio();
-    DINT;
-    InitPieCtrl();
-    IER = 0x0000;
-    IFR = 0x0000;
-    InitPieVectTable();
-
-}
-
-extern void initializeAdcInterrupts(struct IBC_PFM_VARIABLES *ibcPfmVariables);
+//
+// control_logic.c global functions
+//
+extern void initializeDsp(void);
 
 extern void configureIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables);
+
+extern Uint32 frequencyToPeriod10ns(float frequency);
+
+//
+// control_logic_adc.c acquisition functions
+//
+extern void initializeAdcInterrupts(struct IBC_PFM_VARIABLES *ibcPfmVariables);
 
 extern void configureADC(struct ADC_VARIABLES *adc);
 
 extern void configureAdcEPWM(struct IBC_PFM_VARIABLES *ibcPfmVariables);
-
-extern void initializeEpwms(struct IBC_PFM_VARIABLES *ibcPfmVariables);
-
-extern void configureEpwm(struct EPWM_VARIABLES epwm);
 
 extern void setAdc1PerModule(struct ADC_VARIABLES *adc, Uint16 channel);
 
@@ -101,21 +102,28 @@ extern void configureAdcAquisition(struct ADC_VARIABLES *adc, float coefA,
                                    float coefB, float cutOffFrequencyHz,
                                    Uint16 samplingPeriod10ns);
 
-extern void updateEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
-                                   Uint16 period10ns);
-
 extern void updateSamplingPeriodIbcPfm(
         struct IBC_PFM_VARIABLES *ibcPfmVariables, Uint16 period10ns);
-
-extern void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm,
-                                Uint16 epwmConfiguration, Uint16 epwmModule,
-                                Uint16 followUp, Uint32 period10ns,
-                                Uint32 delay10ns);
 
 extern Uint16 updateAnalogResultRead(struct ADC_VARIABLES *adc);
 
 extern double updateAnalogValue(struct ADC_VARIABLES *adc);
 
 extern double updateAnalogValueFiltered(struct ADC_VARIABLES *adc);
+
+//
+// control_logic_epwm.c epwm functions
+//
+extern void initializeEpwms(struct IBC_PFM_VARIABLES *ibcPfmVariables);
+
+extern void configureEpwm(struct EPWM_VARIABLES epwm);
+
+extern void updateEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
+                                   Uint16 period10ns);
+
+extern void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm,
+                                Uint16 epwmConfiguration, Uint16 epwmModule,
+                                Uint16 followUp, Uint32 period10ns,
+                                Uint32 delay10ns);
 
 #endif /* CONTROL_LOGIC_H_ */
