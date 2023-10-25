@@ -16,6 +16,7 @@ struct RMS_CALCULATION
 {
     double sumSquare;
     double value;
+    double sine;
     double coefFilter;
     Uint32 cutOffFrequencyHz;
 };

@@ -41,8 +41,8 @@ struct ADC_VARIABLES
     Uint16 overSample;
     Uint16 module;
     Uint16 enable;
-    double coefA;
-    double coefB;
+    double coef;
+    double offset;
     double value;
     Uint32 cutOffFrequencyHz;
     double coefFilter;
@@ -117,7 +117,7 @@ extern double updateAnalogValueFiltered(struct ADC_VARIABLES *adc);
 //
 extern void initializeEpwms(struct IBC_PFM_VARIABLES *ibcPfmVariables);
 
-extern void configureEpwm(struct EPWM_VARIABLES epwm);
+extern void configureEpwm(struct EPWM_VARIABLES *epwm);
 
 extern void updateEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
                                    Uint16 period10ns);
@@ -127,6 +127,9 @@ extern void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm,
                                 Uint16 followUp, Uint32 period10ns,
                                 Uint32 delay10ns);
 
+extern void updateEpwmConfiguration(struct EPWM_VARIABLES *epwm,
+                                    Uint16 epwmConfiguration);
+
 //
 // control_logic_util.c util functions
 //
@@ -134,6 +137,7 @@ extern double rmsCalculation(struct RMS_CALCULATION *rms,
                              double newAcquisition);
 
 extern void configureRmsCalculation(struct RMS_CALCULATION *rms,
-        float cutOffFrequencyHz, Uint16 samplingPeriod10ns);
+                                    float cutOffFrequencyHz,
+                                    Uint16 samplingPeriod10ns);
 
 #endif /* CONTROL_LOGIC_H_ */

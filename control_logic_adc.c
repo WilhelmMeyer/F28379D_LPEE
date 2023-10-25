@@ -273,11 +273,11 @@ void setAdcModule(struct ADC_VARIABLES *adc)
     }
 }
 
-void configureAdcAquisition(struct ADC_VARIABLES *adc, float coefA, float coefB,
+void configureAdcAquisition(struct ADC_VARIABLES *adc, float coef, float offset,
                             float cutOffFrequencyHz, Uint16 samplingPeriod10ns)
 {
-    adc->coefA = coefA;
-    adc->coefB = coefB;
+    adc->coef = coef;
+    adc->offset = offset;
     adc->cutOffFrequencyHz = cutOffFrequencyHz;
     adc->coefFilter = exp(
             -__div2pif32(adc->cutOffFrequencyHz) * samplingPeriod10ns * 1e-8);
@@ -342,14 +342,17 @@ void setAdc4PerModule(struct ADC_VARIABLES *adc1, Uint16 channel1,
 Uint16 updateAnalogResultRead(struct ADC_VARIABLES *adc)
 {
     Uint32 result = 0;
+    Uint16 overSampleQty = 0;
 
     for (int i = 0; i < TOTAL_ADC_RESULTS; i++)
     {
-        if (adc->overSample & 0x0001 << i)
+        if (adc->overSample & 0x0001 << i){
             result += *ADC_RESULTS[adc->module][i];
+            overSampleQty++;
+        }
     }
 
-    adc->results = (Uint16) __divf32(result, 16);
+    adc->results = (Uint16) __divf32(result, overSampleQty);
 
     return adc->results;
 }
@@ -357,7 +360,7 @@ Uint16 updateAnalogResultRead(struct ADC_VARIABLES *adc)
 double updateAnalogValue(struct ADC_VARIABLES *adc)
 {
     updateAnalogResultRead(adc);
-    adc->value = adc->coefA * adc->results + adc->coefB;
+    adc->value = adc->coef * (adc->results - adc->offset);
     return adc->value;
 }
 

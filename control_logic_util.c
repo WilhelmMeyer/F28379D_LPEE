@@ -27,6 +27,8 @@ double rmsCalculation(struct RMS_CALCULATION *rms, double newAcquisition)
 
     rms->value = __sqrt(rms->sumSquare);
 
+    rms->sine = __divf32(newAcquisition * 1.4142135623731, rms->value);
+
     return rms->value;
 }
 

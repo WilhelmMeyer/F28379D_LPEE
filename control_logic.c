@@ -97,7 +97,7 @@ void configureIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables)
     {
         if (ibcPfmVariables->epwm[i].enable)
         {
-            configureEpwm(ibcPfmVariables->epwm[i]);
+            configureEpwm(&ibcPfmVariables->epwm[i]);
         }
     }
 
