@@ -94,7 +94,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="main_dcdc_ibc_pfm.c|adc_soc_epwm_cpu01.c|epwm_deadband_cpu01.c|updown_aq_example.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="main_simple_pwm.c|main_vienna_ibc_pfm.c|main_dcdc_ibc_pfm.c|adc_soc_epwm_cpu01.c|epwm_deadband_cpu01.c|updown_aq_example.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

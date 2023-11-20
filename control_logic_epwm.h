@@ -22,6 +22,7 @@
 #define EPWM_SC_PFM 3
 #define EPWM_SC_PFM_SUPERPOSITION 4
 #define EPWM_SC_PFM_DEADBAND 5
+#define EPWM_SIMPLE_PWM 6
 
 
 //

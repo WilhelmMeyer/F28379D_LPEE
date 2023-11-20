@@ -54,7 +54,7 @@ struct EPWM_VARIABLES
     Uint16 period10ns;
     Uint16 comparatorA10ns;
     Uint16 comparatorB10ns;
-    Uint16 epwmConfiguration;
+    Uint16 configuration;
     Uint16 risingEdgeDelay10ns;
     Uint16 fallingEdgeDelay10ns;
     Uint16 module;
@@ -122,10 +122,12 @@ extern void configureEpwm(struct EPWM_VARIABLES *epwm);
 extern void updateEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
                                    Uint16 period10ns);
 
+extern void updateDutyCycleA(struct EPWM_VARIABLES *epwm, double dutyCycle);
+
 extern void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm,
                                 Uint16 epwmConfiguration, Uint16 epwmModule,
                                 Uint16 followUp, Uint32 period10ns,
-                                Uint32 delay10ns);
+                                Uint32 comparatorA10ns, Uint32 delay10ns);
 
 extern void updateEpwmConfiguration(struct EPWM_VARIABLES *epwm,
                                     Uint16 epwmConfiguration);
@@ -139,5 +141,16 @@ extern double rmsCalculation(struct RMS_CALCULATION *rms,
 extern void configureRmsCalculation(struct RMS_CALCULATION *rms,
                                     float cutOffFrequencyHz,
                                     Uint16 samplingPeriod10ns);
+
+extern void pidConfiguration(struct PID_VARIABLES *pid, Uint16 pidConfiguration,
+                             Uint16 period10ns, double kp, double ti, double td,
+                             Uint16 N);
+
+extern double updatePidControllerOutput(struct PID_VARIABLES *pid,
+                                        Uint16 pidOperation,
+                                        double openLoopOutput, double setpoint,
+                                        double measuredProcessVariable,
+                                        double upperSaturationLimit,
+                                        double lowerSaturationLimit);
 
 #endif /* CONTROL_LOGIC_H_ */
