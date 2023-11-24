@@ -108,7 +108,21 @@ void configureIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables)
     EINT;
     ERTM;
 
-    PieCtrlRegs.PIEIER1.bit.INTx1 = 1;
+    switch (ibcPfmVariables->epwm[0].module)
+    {
+    case ADCA_MODULE:
+        PieCtrlRegs.PIEIER1.bit.INTx1 = 1;
+        break;
+    case ADCB_MODULE:
+        PieCtrlRegs.PIEIER1.bit.INTx2 = 1;
+        break;
+    case ADCC_MODULE:
+        PieCtrlRegs.PIEIER1.bit.INTx3 = 1;
+        break;
+    case ADCD_MODULE:
+        PieCtrlRegs.PIEIER1.bit.INTx6 = 1;
+        break;
+    }
 
     EALLOW;
     CpuSysRegs.PCLKCR0.bit.TBCLKSYNC = 1;

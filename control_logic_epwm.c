@@ -122,8 +122,8 @@ void updateComparatorB(struct EPWM_VARIABLES *epwm, Uint16 comparatorB10ns)
     (*EPWM[epwm->module]).CMPB.bit.CMPB = epwm->comparatorB10ns;
 }
 
-void updateEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
-                            Uint16 period10ns)
+void updateAllEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
+                               Uint16 period10ns)
 {
     Uint16 comparatorA10ns = period10ns >> 1;
     for (int i = 0; i < MAX_EPWM; i++)
@@ -131,6 +131,26 @@ void updateEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
         updatePeriod(&ibcPfmVariables->epwm[i], period10ns);
         updateComparatorA(&ibcPfmVariables->epwm[i], comparatorA10ns);
     }
+}
+
+void updateEpwmPeriodIbcPfm(struct EPWM_VARIABLES *epwm, Uint16 period10ns)
+{
+    Uint16 comparatorA10ns = period10ns >> 1;
+
+    updatePeriod(epwm, period10ns);
+    updateComparatorA(epwm, comparatorA10ns);
+
+}
+
+void updateEpwmPeriodAndPhaseIbcPfm(struct EPWM_VARIABLES *epwm,
+                                    Uint16 period10ns, Uint16 phase10ns)
+{
+    Uint16 comparatorA10ns = phase10ns;
+    Uint16 comparatorB10ns = phase10ns + (period10ns >> 1);
+
+    updatePeriod(epwm, period10ns);
+    updateComparatorA(epwm, comparatorA10ns);
+    updateComparatorB(epwm, comparatorB10ns);
 }
 
 void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm, Uint16 epwmConfiguration,
@@ -158,38 +178,41 @@ void updateEpwmConfiguration(struct EPWM_VARIABLES *epwm,
     if (epwm->configuration == EPWM_ALWAYS_OFF)
     {
         (*EPWM[epwm->module]).AQCTLA.bit.ZRO = AQ_CLEAR;
-        (*EPWM[epwm->module]).AQCTLA.bit.PRD = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLA.bit.CAU = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLA.bit.CAD = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLA.bit.CBU = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLA.bit.CBD = AQ_NO_ACTION;
+        (*EPWM[epwm->module]).AQCTLA.bit.PRD = AQ_CLEAR;
+        (*EPWM[epwm->module]).AQCTLA.bit.CAU = AQ_CLEAR;
+        (*EPWM[epwm->module]).AQCTLA.bit.CAD = AQ_CLEAR;
+        (*EPWM[epwm->module]).AQCTLA.bit.CBU = AQ_CLEAR;
+        (*EPWM[epwm->module]).AQCTLA.bit.CBD = AQ_CLEAR;
 
         (*EPWM[epwm->module]).AQCTLB.bit.ZRO = AQ_CLEAR;
-        (*EPWM[epwm->module]).AQCTLB.bit.PRD = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLB.bit.CAU = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLB.bit.CAD = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLB.bit.CBU = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLB.bit.CBD = AQ_NO_ACTION;
+        (*EPWM[epwm->module]).AQCTLB.bit.PRD = AQ_CLEAR;
+        (*EPWM[epwm->module]).AQCTLB.bit.CAU = AQ_CLEAR;
+        (*EPWM[epwm->module]).AQCTLB.bit.CAD = AQ_CLEAR;
+        (*EPWM[epwm->module]).AQCTLB.bit.CBU = AQ_CLEAR;
+        (*EPWM[epwm->module]).AQCTLB.bit.CBD = AQ_CLEAR;
 
     }
     else if (epwm->configuration == EPWM_ALWAYS_ON)
     {
         (*EPWM[epwm->module]).AQCTLA.bit.ZRO = AQ_SET;
-        (*EPWM[epwm->module]).AQCTLA.bit.PRD = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLA.bit.CAU = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLA.bit.CAD = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLA.bit.CBU = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLA.bit.CBD = AQ_NO_ACTION;
+        (*EPWM[epwm->module]).AQCTLA.bit.PRD = AQ_SET;
+        (*EPWM[epwm->module]).AQCTLA.bit.CAU = AQ_SET;
+        (*EPWM[epwm->module]).AQCTLA.bit.CAD = AQ_SET;
+        (*EPWM[epwm->module]).AQCTLA.bit.CBU = AQ_SET;
+        (*EPWM[epwm->module]).AQCTLA.bit.CBD = AQ_SET;
 
         (*EPWM[epwm->module]).AQCTLB.bit.ZRO = AQ_SET;
-        (*EPWM[epwm->module]).AQCTLB.bit.PRD = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLB.bit.CAU = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLB.bit.CAD = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLB.bit.CBU = AQ_NO_ACTION;
-        (*EPWM[epwm->module]).AQCTLB.bit.CBD = AQ_NO_ACTION;
+        (*EPWM[epwm->module]).AQCTLB.bit.PRD = AQ_SET;
+        (*EPWM[epwm->module]).AQCTLB.bit.CAU = AQ_SET;
+        (*EPWM[epwm->module]).AQCTLB.bit.CAD = AQ_SET;
+        (*EPWM[epwm->module]).AQCTLB.bit.CBU = AQ_SET;
+        (*EPWM[epwm->module]).AQCTLB.bit.CBD = AQ_SET;
 
     }
-    else
+    else if (epwm->configuration == EPWM_SC_PFM
+            || epwm->configuration == EPWM_SC_PFM_SUPERPOSITION
+            || epwm->configuration == EPWM_SC_PFM_DEADBAND
+            || epwm->configuration == EPWM_SIMPLE_PWM)
     {
 
         (*EPWM[epwm->module]).AQCTLA.bit.ZRO = AQ_SET;
@@ -206,8 +229,27 @@ void updateEpwmConfiguration(struct EPWM_VARIABLES *epwm,
         (*EPWM[epwm->module]).AQCTLB.bit.CBU = AQ_NO_ACTION;
         (*EPWM[epwm->module]).AQCTLB.bit.CBD = AQ_NO_ACTION;
     }
+    else if (epwm->configuration == EPWM_SC_PFM_PHASE
+            || epwm->configuration == EPWM_SC_PFM_PHASE_SUPERPOSITION
+            || epwm->configuration == EPWM_SC_PFM_PHASE_DEADBAND)
+    {
+        (*EPWM[epwm->module]).AQCTLA.bit.ZRO = AQ_NO_ACTION;
+        (*EPWM[epwm->module]).AQCTLA.bit.PRD = AQ_NO_ACTION;
+        (*EPWM[epwm->module]).AQCTLA.bit.CAU = AQ_SET;
+        (*EPWM[epwm->module]).AQCTLA.bit.CAD = AQ_NO_ACTION;
+        (*EPWM[epwm->module]).AQCTLA.bit.CBU = AQ_CLEAR;
+        (*EPWM[epwm->module]).AQCTLA.bit.CBD = AQ_NO_ACTION;
 
-    if (epwm->configuration == EPWM_SC_PFM_SUPERPOSITION)
+        (*EPWM[epwm->module]).AQCTLB.bit.ZRO = AQ_NO_ACTION;
+        (*EPWM[epwm->module]).AQCTLB.bit.PRD = AQ_NO_ACTION;
+        (*EPWM[epwm->module]).AQCTLB.bit.CAU = AQ_CLEAR;
+        (*EPWM[epwm->module]).AQCTLB.bit.CAD = AQ_NO_ACTION;
+        (*EPWM[epwm->module]).AQCTLB.bit.CBU = AQ_SET;
+        (*EPWM[epwm->module]).AQCTLB.bit.CBD = AQ_NO_ACTION;
+    }
+
+    if (epwm->configuration == EPWM_SC_PFM_SUPERPOSITION
+            || epwm->configuration == EPWM_SC_PFM_PHASE_SUPERPOSITION)
     {
         (*EPWM[epwm->module]).DBCTL.bit.IN_MODE = DBA_ALL;
         (*EPWM[epwm->module]).DBCTL.bit.POLSEL = DB_ACTV_LOC;
@@ -216,7 +258,8 @@ void updateEpwmConfiguration(struct EPWM_VARIABLES *epwm,
         (*EPWM[epwm->module]).DBRED.bit.DBRED = epwm->risingEdgeDelay10ns;
         (*EPWM[epwm->module]).DBFED.bit.DBFED = epwm->fallingEdgeDelay10ns;
     }
-    else if (epwm->configuration == EPWM_SC_PFM_DEADBAND)
+    else if (epwm->configuration == EPWM_SC_PFM_DEADBAND
+            || epwm->configuration == EPWM_SC_PFM_PHASE_DEADBAND)
     {
         (*EPWM[epwm->module]).DBCTL.bit.IN_MODE = DBA_ALL;
         (*EPWM[epwm->module]).DBCTL.bit.POLSEL = DB_ACTV_HIC;
@@ -225,7 +268,7 @@ void updateEpwmConfiguration(struct EPWM_VARIABLES *epwm,
         (*EPWM[epwm->module]).DBRED.bit.DBRED = epwm->risingEdgeDelay10ns;
         (*EPWM[epwm->module]).DBFED.bit.DBFED = epwm->fallingEdgeDelay10ns;
     }
-    else if (epwm->configuration == EPWM_SC_PFM)
+    else
     {
         (*EPWM[epwm->module]).DBCTL.bit.OUT_MODE = DB_DISABLE;
     }

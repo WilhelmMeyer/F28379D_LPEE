@@ -119,8 +119,14 @@ extern void initializeEpwms(struct IBC_PFM_VARIABLES *ibcPfmVariables);
 
 extern void configureEpwm(struct EPWM_VARIABLES *epwm);
 
-extern void updateEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
+extern void updateAllEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
+                                      Uint16 period10ns);
+
+extern void updateEpwmPeriodIbcPfm(struct EPWM_VARIABLES *epwm,
                                    Uint16 period10ns);
+
+extern void updateEpwmPeriodAndPhaseIbcPfm(struct EPWM_VARIABLES *epwm,
+                                           Uint16 period10ns, Uint16 phase10ns);
 
 extern void updateDutyCycleA(struct EPWM_VARIABLES *epwm, double dutyCycle);
 
