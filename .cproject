@@ -95,7 +95,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="2837x_RAM_lnk_cpu1.cmd|2837x_FLASH_lnk_cpu1.cmd|main_simple_pwm.c|main_dcdc_ibc_pfm.c|adc_soc_epwm_cpu01.c|epwm_deadband_cpu01.c|updown_aq_example.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="main_vienna_ibc_pfm.c|2837x_RAM_lnk_cpu1.cmd|2837x_FLASH_lnk_cpu1.cmd|main_simple_pwm.c|main_dcdc_ibc_pfm.c|adc_soc_epwm_cpu01.c|epwm_deadband_cpu01.c|updown_aq_example.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
