@@ -35,6 +35,12 @@ void main(void)
 
     configureIbcPfm(&ibcPfmVariables);
 
+    Uint32 period = frequencyToPeriod10ns(pulseFrequency);
+
+    updateEpwmPeriodIbcPfm(&ibcPfmVariables, period);
+
+    updateAnalogValueFiltered(&ibcPfmVariables.adc[0]);
+
     //
     // IDLE loop. Just sit and loop forever (optional):
     //
@@ -75,11 +81,6 @@ void initializeVariables(void)
 //
 void interruptionFunction(void)
 {
-    Uint32 period = frequencyToPeriod10ns(pulseFrequency);
-
-    updateEpwmPeriodIbcPfm(&ibcPfmVariables, period);
-
-    updateAnalogValueFiltered(&ibcPfmVariables.adc[0]);
 
 }
 

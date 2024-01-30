@@ -60,9 +60,6 @@ struct EPWM_VARIABLES
     Uint16 module;
     Uint16 followUp;
     Uint16 enable;
-    Uint16 POLSEL;
-    Uint16 OUTSWAP;
-    Uint16 DEDB_MODE;
 };
 
 struct IBC_PFM_VARIABLES
@@ -118,20 +115,9 @@ extern double updateAnalogValueFiltered(struct ADC_VARIABLES *adc);
 //
 // control_logic_epwm.c epwm functions
 //
-
-extern int roundNo(double num);
-
 extern void initializeEpwms(struct IBC_PFM_VARIABLES *ibcPfmVariables);
 
 extern void configureEpwm(struct EPWM_VARIABLES *epwm);
-
-extern void configureOneShotEpwm(struct EPWM_VARIABLES *epwm);
-
-extern void configureSlaveEpwm(struct EPWM_VARIABLES *epwm);
-
-extern void configureMasterEpwm(struct EPWM_VARIABLES *epwm);
-
-extern void configureOSHTSYNCEpwm(struct EPWM_VARIABLES *epwm);
 
 extern void updateAllEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
                                       Uint16 period10ns);
@@ -139,41 +125,15 @@ extern void updateAllEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
 extern void updateEpwmPeriodIbcPfm(struct EPWM_VARIABLES *epwm,
                                    Uint16 period10ns);
 
-extern void updateEpwmPeriodNormal(struct EPWM_VARIABLES *epwm,
-                                   Uint16 period10ns);
-
 extern void updateEpwmPeriodAndPhaseIbcPfm(struct EPWM_VARIABLES *epwm,
                                            Uint16 period10ns, Uint16 phase10ns);
 
-extern void updateEpwmDelayIbcPfm(struct EPWM_VARIABLES *epwm,
-                                  Uint16 delay10ns);
-
-extern void updateEpwmREDIbcPfm(struct EPWM_VARIABLES *epwm, Uint16 delay10ns);
-
-extern void updateEpwmFEDIbcPfm(struct EPWM_VARIABLES *epwm, Uint16 delay10ns);
-
-extern void updateEpwmPOLSELIbcPfm(struct EPWM_VARIABLES *epwm, Uint16 mode);
-
-extern void updateEpwmOUTSWAPIbcPfm(struct EPWM_VARIABLES *epwm, Uint16 mode);
-
-extern void updateEpwmDEDB_MODEIbcPfm(struct EPWM_VARIABLES *epwm, Uint16 mode);
-
-extern void updateComparatorA(struct EPWM_VARIABLES *epwm,
-                              Uint16 comparatorA10ns);
-
-extern void updateComparatorB(struct EPWM_VARIABLES *epwm,
-                              Uint16 comparatorB10ns);
-
 extern void updateDutyCycleA(struct EPWM_VARIABLES *epwm, double dutyCycle);
-
-extern void updateDutyCycleB(struct EPWM_VARIABLES *epwm, double dutyCycle,
-                             Uint16 phase);
 
 extern void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm,
                                 Uint16 epwmConfiguration, Uint16 epwmModule,
                                 Uint16 followUp, Uint32 period10ns,
-                                Uint32 comparatorA10ns, Uint32 comparatorB10ns,
-                                Uint32 delay10ns);
+                                Uint32 comparatorA10ns, Uint32 delay10ns);
 
 extern void updateEpwmConfiguration(struct EPWM_VARIABLES *epwm,
                                     Uint16 epwmConfiguration);
