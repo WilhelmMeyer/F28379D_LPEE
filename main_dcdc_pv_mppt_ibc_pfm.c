@@ -112,8 +112,7 @@ void interruptionFunction(void)
     if (controllOperation == OPEN_LOOP)
     {
 
-        periodoChaveamento = frequencyToPeriod10ns(pulseFrequency);
-        updateEpwmPeriodIbcPfm(&ibcPfmVariables.epwm[0], periodoChaveamento);
+
 
     }
     else
@@ -179,8 +178,14 @@ void interruptionFunction(void)
         contadorMediaMovelPotenciaSolar++; //incrementa o contador
         pulseFrequency = 100000000 / periodoChaveamento;
 
-        updateEpwmPeriodIbcPfm(&ibcPfmVariables.epwm[0], periodoChaveamento);
     }
+
+    periodoChaveamento = frequencyToPeriod10ns(pulseFrequency);
+
+    if(periodoChaveamento > 2222) periodoChaveamento = 2222;
+    else if(periodoChaveamento < 640)periodoChaveamento = 640;
+
+    updateEpwmPeriodIbcPfm(&ibcPfmVariables.epwm[0], periodoChaveamento);
 
 }
 

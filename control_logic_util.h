@@ -41,8 +41,19 @@ struct RMS_CALCULATION
     double value;
     double sine;
     double coefFilter;
+    Uint16 semiCycle;
     Uint32 cutOffFrequencyHz;
 };
+
+
+struct ZERO_CROSSING_LEAD
+{
+    double sine;
+    double sineDerivativeApproximation;
+    double sineWithLead;
+    Uint16 quadrant;
+};
+
 
 struct PID_VARIABLES
 {

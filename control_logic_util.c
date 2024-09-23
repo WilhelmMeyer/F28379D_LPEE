@@ -27,7 +27,16 @@ double rmsCalculation(struct RMS_CALCULATION *rms, double newAcquisition)
 
     rms->value = __sqrt(rms->sumSquare);
 
-    rms->sine = __divf32(newAcquisition * 1.4142135623731, rms->value);
+    rms->sine = __divf32(newAcquisition * 0.707106781, rms->value);
+
+    if (rms->sine > 0)
+    {
+        rms->semiCycle = 1;
+    }
+    else
+    {
+        rms->semiCycle = 0;
+    }
 
     return rms->value;
 }
@@ -101,7 +110,7 @@ double updatePidControllerOutput(struct PID_VARIABLES *pid, Uint16 pidOperation,
         pid->output1 = pid->output0;
 
         double output = pid->output1 + pid->outputP0 + pid->outputI0
-        + pid->outputD0;
+                + pid->outputD0;
         if (output > upperSaturationLimit)
         {
             output = upperSaturationLimit;

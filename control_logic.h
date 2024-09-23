@@ -43,6 +43,8 @@ struct ADC_VARIABLES
     Uint16 enable;
     double coef;
     double offset;
+    double autoOffsetCoef;
+    double autoOffset;
     double value;
     Uint32 cutOffFrequencyHz;
     double coefFilter;
@@ -111,6 +113,10 @@ extern Uint16 updateAnalogResultRead(struct ADC_VARIABLES *adc);
 extern double updateAnalogValue(struct ADC_VARIABLES *adc);
 
 extern double updateAnalogValueFiltered(struct ADC_VARIABLES *adc);
+
+extern double updateAnalogValueAutoOffset(struct ADC_VARIABLES *adc);
+
+extern double updateAnalogValueFilteredAutoOffset(struct ADC_VARIABLES *adc);
 
 //
 // control_logic_epwm.c epwm functions
