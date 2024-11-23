@@ -273,8 +273,9 @@ void setAdcModule(struct ADC_VARIABLES *adc)
     }
 }
 
-void configureAdcAquisition(struct ADC_VARIABLES *adc, float coef, float offset,
-                            float cutOffFrequencyHz, Uint16 samplingPeriod10ns)
+void configureAdcAquisitionPeriod10ns(struct ADC_VARIABLES *adc, float coef,
+                                      float offset, float cutOffFrequencyHz,
+                                      Uint16 samplingPeriod10ns)
 {
     adc->coef = coef;
     adc->offset = offset;
@@ -283,6 +284,14 @@ void configureAdcAquisition(struct ADC_VARIABLES *adc, float coef, float offset,
     adc->coefFilter = exp(
             -__div2pif32(adc->cutOffFrequencyHz) * samplingPeriod10ns * 1e-8);
     adc->autoOffsetCoef = 1e-5;
+}
+
+void configureAdcAquisition(struct ADC_VARIABLES *adc, float coef, float offset,
+                            float cutOffFrequencyHz, Uint16 samplingFrequencyHz)
+{
+    configureAdcAquisitionPeriod10ns(
+            adc, coef, offset, cutOffFrequencyHz,
+            frequencyToPeriod10ns(samplingFrequencyHz));
 }
 
 void setAdcSingle(struct ADC_VARIABLES *adc, Uint16 channel, Uint16 soc)
@@ -399,6 +408,13 @@ void updateSamplingPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
 {
     ibcPfmVariables->adcPeriod10ns = period10ns;
     ibcPfmVariables->adcComparatorA10ns = period10ns >> 1;
+}
+
+void updateSamplingFrequencyIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
+                                   Uint16 frequencyHz)
+{
+    updateSamplingPeriodIbcPfm(ibcPfmVariables,
+                               frequencyToPeriod10ns(frequencyHz));
 }
 
 interrupt void adcaInterruption(void)

@@ -95,11 +95,16 @@ void configureEpwm(struct EPWM_VARIABLES *epwm)
     updateEpwmConfiguration(epwm, epwm->configuration);
 }
 
-void updatePeriod(struct EPWM_VARIABLES *epwm, Uint16 period10ns)
+void updatePeriod10ns(struct EPWM_VARIABLES *epwm, Uint16 period10ns)
 {
     epwm->period10ns = period10ns;
     if (epwm->followUp == epwm->module)
         (*EPWM[epwm->module]).TBPRD = epwm->period10ns;
+}
+
+void updatePeriod(struct EPWM_VARIABLES *epwm, double periodSeconds)
+{
+    updatePeriod10ns(epwm, (Uint16) periodSeconds * 1e8);
 }
 
 void updateComparatorA(struct EPWM_VARIABLES *epwm, Uint16 comparatorA10ns)
@@ -122,40 +127,58 @@ void updateComparatorB(struct EPWM_VARIABLES *epwm, Uint16 comparatorB10ns)
     (*EPWM[epwm->module]).CMPB.bit.CMPB = epwm->comparatorB10ns;
 }
 
-void updateAllEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
-                               Uint16 period10ns)
-{
-    Uint16 comparatorA10ns = period10ns >> 1;
-    for (int i = 0; i < MAX_EPWM; i++)
-    {
-        updatePeriod(&ibcPfmVariables->epwm[i], period10ns);
-        updateComparatorA(&ibcPfmVariables->epwm[i], comparatorA10ns);
-    }
-}
-
-void updateEpwmPeriodIbcPfm(struct EPWM_VARIABLES *epwm, Uint16 period10ns)
+void updateEpwmPeriod10nsIbcPfm(struct EPWM_VARIABLES *epwm, Uint16 period10ns)
 {
     Uint16 comparatorA10ns = period10ns >> 1;
 
-    updatePeriod(epwm, period10ns);
+    updatePeriod10ns(epwm, period10ns);
     updateComparatorA(epwm, comparatorA10ns);
 
 }
 
-void updateEpwmPeriodAndPhaseIbcPfm(struct EPWM_VARIABLES *epwm,
-                                    Uint16 period10ns, Uint16 phase10ns)
+void updateEpwmPeriodIbcPfm(struct EPWM_VARIABLES *epwm, double periodSeconds)
+{
+    updateEpwmPeriod10nsIbcPfm(epwm, periodSeconds * 1e8);
+}
+
+void updateAllEpwmPeriod10nsIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
+                                   Uint16 period10ns)
+{
+    for (int i = 0; i < MAX_EPWM; i++)
+    {
+        updateEpwmPeriod10nsIbcPfm(&ibcPfmVariables->epwm[i], period10ns);
+    }
+}
+
+void updateAllEpwmPeriodIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables,
+                               double periodSeconds)
+{
+    Uint16 period10ns = periodSeconds * 1e8;
+    updateAllEpwmPeriod10nsIbcPfm(ibcPfmVariables, period10ns);
+}
+
+void updateEpwmPeriod10nsAndPhaseIbcPfm(struct EPWM_VARIABLES *epwm,
+                                        Uint16 period10ns, Uint16 phase10ns)
 {
     Uint16 comparatorA10ns = phase10ns;
     Uint16 comparatorB10ns = phase10ns + (period10ns >> 1);
 
-    updatePeriod(epwm, period10ns);
+    updatePeriod10ns(epwm, period10ns);
     updateComparatorA(epwm, comparatorA10ns);
     updateComparatorB(epwm, comparatorB10ns);
 }
 
-void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm, Uint16 epwmConfiguration,
-                         Uint16 epwmModule, Uint16 followUp, Uint32 period10ns,
-                         Uint32 comparatorA10ns, Uint32 delay10ns)
+void updateEpwmPeriodAndPhaseIbcPfm(struct EPWM_VARIABLES *epwm,
+                                    double periodSeconds, double phaseSeconds)
+{
+    updateEpwmPeriod10nsAndPhaseIbcPfm(epwm, (Uint16) periodSeconds * 1e8,
+                                       (Uint16) phaseSeconds * 1e8);
+}
+
+void configureIbcPfmEpwmPeriod10ns(struct EPWM_VARIABLES *epwm,
+                                   Uint16 epwmConfiguration, Uint16 epwmModule,
+                                   Uint16 followUp, Uint32 period10ns,
+                                   Uint32 comparatorA10ns, Uint32 delay10ns)
 {
     period10ns--; // fix epwm TBPRD count
 
@@ -167,6 +190,18 @@ void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm, Uint16 epwmConfiguration,
     epwm->module = epwmModule;
     epwm->followUp = followUp;
     epwm->enable = EPWM_ENABLE;
+}
+
+void configureIbcPfmEpwm(struct EPWM_VARIABLES *epwm, Uint16 epwmConfiguration,
+                         Uint16 epwmModule, Uint16 followUp, Uint32 frequencyHz,
+                         double dutyCicle, double delaySeconds)
+{
+    Uint32 period10ns = frequencyToPeriod10ns(frequencyHz);
+    Uint32 ComparatorA10ns = period10ns * dutyCicle;
+    Uint32 delay10ns = delaySeconds * 1e8;
+
+    configureIbcPfmEpwmPeriod10ns(epwm, epwmConfiguration, epwmModule, followUp,
+                                  period10ns, ComparatorA10ns, delay10ns);
 }
 
 void updateEpwmConfiguration(struct EPWM_VARIABLES *epwm,

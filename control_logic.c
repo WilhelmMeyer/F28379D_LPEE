@@ -133,7 +133,12 @@ void configureIbcPfm(struct IBC_PFM_VARIABLES *ibcPfmVariables)
 
 }
 
-Uint32 frequencyToPeriod10ns(float frequency)
+Uint32 frequencyToPeriod10ns(double frequencyHz)
 {
-    return (Uint32) __divf32(100000000, frequency);
+    return (Uint32) __divf32(1e8, frequencyHz);
+}
+
+double frequencyToPeriod(double frequencyHz)
+{
+    return __divf32(1, frequencyHz);
 }

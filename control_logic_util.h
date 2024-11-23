@@ -58,7 +58,7 @@ struct ZERO_CROSSING_LEAD
 struct PID_VARIABLES
 {
     Uint16 configuration;
-    Uint16 period10ns;
+    double period;
     double setpoint;
 
     double proportionalGainKp;
@@ -84,6 +84,7 @@ struct PID_VARIABLES
 
     double outputP0;
 
+    double accumulatedIntegral;
     double outputI0;
     double outputI1;
 

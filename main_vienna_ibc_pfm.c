@@ -18,8 +18,11 @@
 #define VOLTAGE_OUTPUT_COEF_V1P 0.11337
 #define VOLTAGE_OUTPUT_COEF_V2N 0.11337
 
-#define MINIMUM_PERIOD_10NS 600 //250000 kHz
-#define MAXIMUM_PERIOD_10NS 1562 // 64000 kHz
+//#define MINIMUM_PERIOD_10NS 600 //250000 kHz
+//#define MAXIMUM_PERIOD_10NS 1562 // 64000 kHz
+
+#define MINIMUM_PERIOD 0.000006 //250000 kHz
+#define MAXIMUM_PERIOD 0.00001562 // 64000 kHz
 
 #define PROPORTIONAL_GAIN -0.000001
 #define INTEGRATIVE_TIME 0.0000000008
@@ -28,7 +31,8 @@
 // Globals
 //
 Uint16 controllOperation = OPEN_LOOP;
-Uint32 switchingPeriod10ns = 50000;
+//Uint32 switchingPeriod10ns = 50000;
+Uint32 switchingPeriod = 0.00002;
 
 struct PID_VARIABLES pid;
 
@@ -74,9 +78,9 @@ double voltageAThetaDelay = 1.13;
 double voltageBThetaDelay = 1.13;
 double voltageCThetaDelay = 1.13;
 
-Uint32 pulseFrequency = 80000;
-Uint32 acquisitionFrequency = 25000;
-Uint32 superpositionDelay10ns = 10;
+Uint32 pulseFrequencyHz = 80000;
+Uint32 acquisitionFrequencyHz = 25000;
+Uint32 superpositionDelay = 0.0000001; //100ns
 
 double outputVoltage = 0;
 double outputVoltageSetpoint = 800;
@@ -120,10 +124,10 @@ void initializeVariables(void)
     //
     ibcPfmVariables.adcInterruptionFunction = &interruptionFunction;
 
-    Uint32 period10ns = frequencyToPeriod10ns(pulseFrequency);
-    Uint32 acquisitionPeriod10ns = frequencyToPeriod10ns(acquisitionFrequency);
+    //Uint32 period10ns = frequencyToPeriod10ns(pulseFrequency);
+    //Uint32 acquisitionPeriod10ns = frequencyToPeriod10ns(acquisitionFrequency);
 
-    updateSamplingPeriodIbcPfm(&ibcPfmVariables, acquisitionPeriod10ns);
+    updateSamplingFrequencyIbcPfm(&ibcPfmVariables, acquisitionFrequencyHz);
 
     //
     // Set adc channels and enable SoC for oversample;
@@ -134,49 +138,49 @@ void initializeVariables(void)
     setAdc1PerModule(voltageC, ADCD15_CHANNEL);
 
     configureAdcAquisition(outputVoltage1p, VOLTAGE_OUTPUT_COEF_V1P, 0, 25000,
-                           acquisitionPeriod10ns);
+                           acquisitionFrequencyHz);
     configureAdcAquisition(outputVoltage2n, VOLTAGE_OUTPUT_COEF_V2N, 0, 25000,
-                           acquisitionPeriod10ns);
+                           acquisitionFrequencyHz);
 
     configureAdcAquisition(voltageA, VOLTAGE_PHASE_A_COEF,
     VOLTAGE_PHASE_A_OFFSET,
-                           500000, acquisitionPeriod10ns);
+                           500000, acquisitionFrequencyHz);
     configureAdcAquisition(voltageB, VOLTAGE_PHASE_B_COEF,
     VOLTAGE_PHASE_B_OFFSET,
-                           500000, acquisitionPeriod10ns);
+                           500000, acquisitionFrequencyHz);
     configureAdcAquisition(voltageC, VOLTAGE_PHASE_C_COEF,
     VOLTAGE_PHASE_C_OFFSET,
-                           500000, acquisitionPeriod10ns);
+                           500000, acquisitionFrequencyHz);
 
-    configureRmsCalculation(&rmsVoltageA, 60, acquisitionPeriod10ns);
-    configureRmsCalculation(&rmsVoltageB, 60, acquisitionPeriod10ns);
-    configureRmsCalculation(&rmsVoltageC, 60, acquisitionPeriod10ns);
+    configureRmsCalculation(&rmsVoltageA, 60, acquisitionFrequencyHz);
+    configureRmsCalculation(&rmsVoltageB, 60, acquisitionFrequencyHz);
+    configureRmsCalculation(&rmsVoltageC, 60, acquisitionFrequencyHz);
 
     for (int i = 0; i < MAX_EPWM; i++)
     {
         configureIbcPfmEpwm(&ibcPfmVariables.epwm[i],
         EPWM_SC_PFM_SUPERPOSITION,
-                            i, EPWM1_LINK, period10ns, period10ns >> 1,
-                            superpositionDelay10ns);
+                            i, EPWM1_LINK, pulseFrequencyHz, 0.5,
+                            superpositionDelay);
 
     }
 
     SPLL_1PH_SOGI_reset(&spllVoltageA);
-    SPLL_1PH_SOGI_config(&spllVoltageA, 60, acquisitionFrequency,
+    SPLL_1PH_SOGI_config(&spllVoltageA, 60, acquisitionFrequencyHz,
                          (float32_t) (222.2862), (float32_t) (-222.034));
     SPLL_1PH_SOGI_coeff_calc(&spllVoltageA);
 
     SPLL_1PH_SOGI_reset(&spllVoltageB);
-    SPLL_1PH_SOGI_config(&spllVoltageB, 60, acquisitionFrequency,
+    SPLL_1PH_SOGI_config(&spllVoltageB, 60, acquisitionFrequencyHz,
                          (float32_t) (222.2862), (float32_t) (-222.034));
     SPLL_1PH_SOGI_coeff_calc(&spllVoltageB);
 
     SPLL_1PH_SOGI_reset(&spllVoltageC);
-    SPLL_1PH_SOGI_config(&spllVoltageC, 60, acquisitionFrequency,
+    SPLL_1PH_SOGI_config(&spllVoltageC, 60, acquisitionFrequencyHz,
                          (float32_t) (222.2862), (float32_t) (-222.034));
     SPLL_1PH_SOGI_coeff_calc(&spllVoltageC);
 
-    pidConfiguration(&pid, PI_INCREMENTAL_ANTI_WINDUP, acquisitionPeriod10ns,
+    pidConfiguration(&pid, PI_INCREMENTAL_ANTI_WINDUP, acquisitionFrequencyHz,
     PROPORTIONAL_GAIN,
                      INTEGRATIVE_TIME, 0, 0);
 
@@ -200,28 +204,28 @@ void interruptionFunction(void)
 
     if (controllOperation == OPEN_LOOP)
     {
-        switchingPeriod10ns = frequencyToPeriod10ns(pulseFrequency);
-        updatePidControllerOutput(&pid, controllOperation, switchingPeriod10ns,
+        switchingPeriod = frequencyToPeriod(pulseFrequencyHz);
+        updatePidControllerOutput(&pid, controllOperation, switchingPeriod,
                                   outputVoltageSetpoint, outputVoltage,
-                                  MAXIMUM_PERIOD_10NS,
-                                  MINIMUM_PERIOD_10NS);
+                                  MAXIMUM_PERIOD,
+                                  MINIMUM_PERIOD);
     }
     else if (controllOperation == CLOSED_LOOP)
     {
-        switchingPeriod10ns = updatePidControllerOutput(&pid, controllOperation,
-                                                        switchingPeriod10ns,
-                                                        -outputVoltageSetpoint,
-                                                        -outputVoltage,
-                                                        MAXIMUM_PERIOD_10NS,
-                                                        MINIMUM_PERIOD_10NS);
+        switchingPeriod = updatePidControllerOutput(&pid, controllOperation,
+                                                        switchingPeriod,
+                                                        outputVoltageSetpoint,
+                                                        outputVoltage,
+                                                        MAXIMUM_PERIOD,
+                                                        MINIMUM_PERIOD);
     }
 
-    if (switchingPeriod10ns > MAXIMUM_PERIOD_10NS)
-        switchingPeriod10ns = MAXIMUM_PERIOD_10NS;
-    else if (switchingPeriod10ns < MINIMUM_PERIOD_10NS)
-        switchingPeriod10ns = MINIMUM_PERIOD_10NS;
+    if (switchingPeriod > MAXIMUM_PERIOD)
+        switchingPeriod = MAXIMUM_PERIOD;
+    else if (switchingPeriod < MINIMUM_PERIOD)
+        switchingPeriod = MINIMUM_PERIOD;
 
-    updateAllEpwmPeriodIbcPfm(&ibcPfmVariables, switchingPeriod10ns);
+    updateAllEpwmPeriodIbcPfm(&ibcPfmVariables, switchingPeriod);
 
     updateAnalogValueFilteredAutoOffset(voltageA);
     updateAnalogValueFilteredAutoOffset(voltageB);

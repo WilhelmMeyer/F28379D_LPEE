@@ -42,23 +42,23 @@ double rmsCalculation(struct RMS_CALCULATION *rms, double newAcquisition)
 }
 
 void configureRmsCalculation(struct RMS_CALCULATION *rms,
-                             float cutOffFrequencyHz, Uint16 samplingPeriod10ns)
+                             Uint32 cutOffFrequencyHz,
+                             Uint32 samplingFrequencyHz)
 {
     rms->cutOffFrequencyHz = cutOffFrequencyHz;
-    rms->coefFilter = exp(
-            -__div2pif32(rms->cutOffFrequencyHz) * samplingPeriod10ns * 1e-8);
+    rms->coefFilter = exp(-__div2pif32(rms->cutOffFrequencyHz) * frequencyToPeriod(samplingFrequencyHz));
 }
 
-void pidConfiguration(struct PID_VARIABLES *pid, Uint16 pidConfiguration,
-                      Uint16 period10ns, double kp, double ti, double td,
-                      Uint16 N)
+void pidConfiguration(struct PID_VARIABLES *pid,
+                                Uint16 pidConfiguration, double frequencyHz,
+                                double kp, double ti, double td, Uint16 N)
 {
     pid->configuration = pidConfiguration;
-    pid->period10ns = period10ns;
+    pid->period = frequencyToPeriod(frequencyHz);
     pid->proportionalGainKp = kp;
 
     pid->integrationTimeTi = ti;
-    pid->integrationGain = kp * period10ns * 0.0000000005 / ti; // Tustin method
+    pid->integrationGain = kp * pid->period / (2* ti); // Tustin method KpTs/2Ti
 
     pid->derivativeTimeTd = td;
     if (pidConfiguration == PID_CONVENTIONAL
@@ -66,13 +66,13 @@ void pidConfiguration(struct PID_VARIABLES *pid, Uint16 pidConfiguration,
             || pidConfiguration == PID_INCREMENTAL
             || pidConfiguration == PID_INCREMENTAL_ANTI_WINDUP)
     {
-        pid->derivativeGain = kp * td / (period10ns * 0.000000001);
+        pid->derivativeGain = kp * td / pid->period;
     }
     else
     {
         pid->derivativeGain = kp * N * td
-                / (td + (N * period10ns * 0.000000001));
-        pid->derivativeGainAux = td / (td + (N * period10ns * 0.000000001));
+                / (td + (N * pid->period));
+        pid->derivativeGainAux = td / (td + (N * pid->period));
     }
 }
 
@@ -109,8 +109,14 @@ double updatePidControllerOutput(struct PID_VARIABLES *pid, Uint16 pidOperation,
 
         pid->output1 = pid->output0;
 
-        double output = pid->output1 + pid->outputP0 + pid->outputI0
-                + pid->outputD0;
+        //double output = pid->output1 + pid->outputP0 + pid->outputI0
+        //        + pid->outputD0;
+        double parcialOutput = pid->output1 + pid->outputP0 + pid->outputD0;
+        pid->accumulatedIntegral += pid->outputI0;
+        double output = parcialOutput + pid->accumulatedIntegral;
+        pid->accumulatedIntegral = (parcialOutput - output)
+                + pid->accumulatedIntegral;
+
         if (output > upperSaturationLimit)
         {
             output = upperSaturationLimit;
