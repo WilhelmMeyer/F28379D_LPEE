@@ -15,10 +15,10 @@
 #define VOLTAGE_PHASE_B_OFFSET 1875
 #define VOLTAGE_PHASE_C_OFFSET 1855
 
-#define VOLTAGE_OUTPUT_COEF_V1P 0.11337
-#define VOLTAGE_OUTPUT_COEF_V2N 0.11337
+#define VOLTAGE_OUTPUT_COEF_V1P 0.1128
+#define VOLTAGE_OUTPUT_COEF_V2N 0.1128
 
-#define MINIMUM_PERIOD_10NS 600 //250000 kHz
+#define MINIMUM_PERIOD_10NS 300
 #define MAXIMUM_PERIOD_10NS 1562 // 64000 kHz
 
 #define PROPORTIONAL_GAIN -0.000001
@@ -54,7 +54,8 @@ struct EPWM_VARIABLES *epwmIbcPfm2S3S4 = &ibcPfmVariables.epwm[3];
 struct EPWM_VARIABLES *epwmIbcPfm3S1S2 = &ibcPfmVariables.epwm[4];
 struct EPWM_VARIABLES *epwmIbcPfm3S3S4 = &ibcPfmVariables.epwm[5];
 
-double semiCycleHisterese = 0.10;
+double semiCycleHisterese = 0.01;
+
 double minimumVoltageForModulationStrategy = 20;
 Uint16 holdCmdSemiCycleA = 0;
 Uint16 holdCmdSemiCycleB = 0;
@@ -74,7 +75,7 @@ double voltageAThetaDelay = 1.13;
 double voltageBThetaDelay = 1.13;
 double voltageCThetaDelay = 1.13;
 
-Uint32 pulseFrequency = 80000;
+Uint32 pulseFrequency = 64000;
 Uint32 acquisitionFrequency = 25000;
 Uint32 superpositionDelay10ns = 10;
 
@@ -155,9 +156,9 @@ void initializeVariables(void)
     for (int i = 0; i < MAX_EPWM; i++)
     {
         configureIbcPfmEpwm(&ibcPfmVariables.epwm[i],
-        EPWM_SC_PFM_SUPERPOSITION,
+                            EPWM_SC_PFM,
                             i, EPWM1_LINK, period10ns, period10ns >> 1,
-                            superpositionDelay10ns);
+                            0);
 
     }
 
@@ -303,28 +304,23 @@ void activateAndHoldIbcPfm(struct RMS_CALCULATION rmsVoltage, double theta,
     }
     else
     {
-        if ((theta > (6.2831853 - semiCycleHisterese) && theta < 6.2831853)
-                || (theta > (3.141592653 - semiCycleHisterese)
-                        && theta < 3.141592653))
+        if ((theta > (6.2831853 - 5*semiCycleHisterese) && theta < (6.2831853 - semiCycleHisterese))
+          ||(theta > (3.1415926 - 5*semiCycleHisterese) && theta < (3.1415926 - semiCycleHisterese)))
         {
             updateEpwmConfiguration(epwmPositiveCycle,
             EPWM_ALWAYS_OFF);
             updateEpwmConfiguration(epwmNegativeCycle,
             EPWM_ALWAYS_OFF);
 
-//            updateEpwmConfiguration(epwmPositiveCycle,
-//            EPWM_SC_PFM_SUPERPOSITION);
-//            updateEpwmConfiguration(epwmNegativeCycle,
-//            EPWM_SC_PFM_SUPERPOSITION);
         }
-        else if (theta > 0.0 && theta < 1.57)
+        else if ((theta > semiCycleHisterese && theta < 1.57) || (theta > 6.2831853 + semiCycleHisterese))
         {
             updateEpwmConfiguration(epwmPositiveCycle,
             EPWM_SC_PFM_SUPERPOSITION);
             updateEpwmConfiguration(epwmNegativeCycle,
             EPWM_ALWAYS_ON);
         }
-        else if (theta > 3.1415926536 && theta < 4.71)
+        else if (theta > (3.1415926536 + semiCycleHisterese) && theta < 4.71)
         {
             updateEpwmConfiguration(epwmPositiveCycle,
             EPWM_ALWAYS_ON);
